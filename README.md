@@ -11,8 +11,23 @@ Given:
 - Linear and/or quadratic transaction costs 
 The optimizer solves:
   
-$mu^{T} w - \lambda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}$
+$$
+\max_{w} \mu^{T} w - \lambda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}
+$$
 
+Subject to:
+$$
+\Sigma{i} w_{i} = 1 \text{(fully invested)}
+$$
+
+$$
+w_{i} \in [w_{min},w_{max}]
+$$
+
+Where:
+- $\lambda$ controls risk aversion
+- $\gamma$ penalizes turnover
+- $||w-w_{0}||_{1}$ approximates linear transaction costs
 ---
 ## Features
 - Implements constrained convex optimization
