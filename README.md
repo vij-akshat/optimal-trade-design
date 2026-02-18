@@ -11,7 +11,7 @@ Given:
 - Linear and/or quadratic transaction costs 
 The optimizer solves:
   
-$mu^{T} w - \lamda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}$
+$mu^{T} w - \lambda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}$
 
 ---
 ## Features
