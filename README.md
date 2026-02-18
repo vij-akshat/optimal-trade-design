@@ -12,13 +12,13 @@ Given:
 The optimizer solves:
   
 $$
-\max_{w} \mu^{T} w - \lambda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}
+\max_{w} \quad \mu^{T} w - \lambda w^{T} \Sigma w - \gamma ||w-w_{0}||_{1}
 $$
 
 Subject to:
 
 $$
-\Sigma_{i} w_{i} \text{(fully invested)}
+\sum_{i} w_{i} \text{(fully invested)}
 $$
 
 
