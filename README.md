@@ -16,9 +16,11 @@ $$
 $$
 
 Subject to:
+
 $$
-\Sigma{i} w_{i} = 1 \text{(fully invested)}
+\Sigma_{i} w_{i} \text{(fully invested)}
 $$
+
 
 $$
 w_{i} \in [w_{min},w_{max}]
