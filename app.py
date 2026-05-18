@@ -147,8 +147,10 @@ def animated_line(
                 line=dict(color=et["color"], width=2, dash=et.get("dash", "solid")),
             ))
     if vline is not None:
+        y_lo = min(0, min(y_full)) * 1.1
+        y_hi = max(y_full) * 1.3
         data.append(go.Scatter(
-            x=[vline, vline], y=[min(y_full) * 1.3, max(y_full) * 1.3],
+            x=[vline, vline], y=[y_lo, y_hi],
             mode="lines", name=vline_label,
             line=dict(color=C["primary"], width=2, dash="dash"),
             showlegend=bool(vline_label),
@@ -316,7 +318,7 @@ elif stage == "1️⃣  Trade Size":
             fill_positive=True,
             height=420,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         st.markdown(
             f'<div class="insight-box">At x* = {xs:,.0f} shares, P\'(x*) ≈ 0. '
             f'Trading more destroys value through impact; trading less leaves edge on the table.</div>',
@@ -338,7 +340,7 @@ elif stage == "1️⃣  Trade Size":
             scatter_point=(xs, alpha - c_cost, f"  MB=MC = {(alpha-c_cost)*100:.2f}¢", C["secondary"]),
             height=420,
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
         st.markdown(
             f'<div class="insight-box">Marginal benefit (α−c) is constant per share. '
             f'Marginal cost (2βx) rises with size. They cross at x* = {xs:,.0f}.</div>',
@@ -446,7 +448,7 @@ elif stage == "2️⃣  Kelly Leverage":
             fill_positive=True,
             height=420,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         st.markdown(
             f'<div class="insight-box">ℓ* = {ell_star:.2f}× — the leverage where marginal return (μ) '
             f'equals marginal risk cost (ℓσ²). Using more leverage destroys log wealth.</div>',
@@ -485,7 +487,7 @@ elif stage == "2️⃣  Kelly Leverage":
                             yaxis=dict(title="Expected Return (%)", gridcolor="#1e2a38"),
                             title="Risk-Return Tradeoff with Leverage",
                             margin=dict(l=50, r=20, t=50, b=50))
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     with tab3:
         fracs = [0.25, 0.5, 0.75, 1.0]
@@ -515,7 +517,7 @@ elif stage == "2️⃣  Kelly Leverage":
             yaxis=dict(title="%", gridcolor="#1e2a38"),
             margin=dict(l=50, r=20, t=50, b=50),
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
         st.dataframe(df_frac.set_index("Fraction"), use_container_width=True)
         st.markdown(
             '<div class="insight-box">½ Kelly halves drawdown risk while losing only ~25% of expected log growth. '
@@ -567,11 +569,11 @@ elif stage == "3️⃣  Execution Timing":
         t_max = st.slider("Chart range (minutes)", 30, 200, 90)
 
     # ── Compute ──
-    def C(t, k, lam): return k / t + lam * t
+    def exec_cost(t, k, lam): return k / t + lam * t
     def t_star(k, lam): return np.sqrt(k / lam)
 
     ts     = t_star(k, lam)
-    cs     = C(ts, k, lam)
+    cs     = exec_cost(ts, k, lam)
     slip_s = k / ts
     opp_s  = lam * ts
 
@@ -587,10 +589,13 @@ elif stage == "3️⃣  Execution Timing":
     st.markdown('<div class="section-header">Visualizations</div>', unsafe_allow_html=True)
     tab1, tab2, tab3 = st.tabs(["📈 Cost Curve (U-shape)", "📊 Component Breakdown", "🌡️ λ Regime Analysis"])
 
-    t_range = np.linspace(1, t_max, 400)
-    total   = C(t_range, k, lam)
+    # Start at ts/4 so the spike at t≈0 doesn't crush the chart
+    t_start = max(3.0, ts / 4)
+    t_range = np.linspace(t_start, t_max, 400)
+    total   = exec_cost(t_range, k, lam)
     slip    = k / t_range
     opp     = lam * t_range
+    y_ceil  = cs * 4   # cap y-axis at 4× the minimum so U-shape is visible
 
     with tab1:
         fig = animated_line(
@@ -608,7 +613,8 @@ elif stage == "3️⃣  Execution Timing":
             scatter_point=(ts, cs, f"  Min cost ${cs:.2f}", C["secondary"]),
             height=440,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(yaxis=dict(range=[0, y_ceil]))
+        st.plotly_chart(fig, width='stretch')
         st.markdown(
             f'<div class="insight-box">At t* = {ts:.1f} min, slippage (${slip_s:.2f}) exactly equals '
             f'opportunity cost (${opp_s:.2f}). This is the AM-GM equality condition — '
@@ -642,21 +648,23 @@ elif stage == "3️⃣  Execution Timing":
             template="plotly_dark", paper_bgcolor=C["bg"], plot_bgcolor=C["bg"],
             height=420, title="Cost Component Breakdown",
             xaxis=dict(title="Execution Time (minutes)", gridcolor="#1e2a38"),
-            yaxis=dict(title="Cost ($)", gridcolor="#1e2a38"),
+            yaxis=dict(title="Cost ($)", gridcolor="#1e2a38", range=[0, y_ceil]),
             margin=dict(l=50, r=20, t=50, b=50),
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     with tab3:
         lambdas = [1, 2, 5, 10, 20]
         fig3 = go.Figure()
         palette = px.colors.sequential.Reds[2:]
+        y_ceil3 = exec_cost(t_start, k, max(lambdas)) * 0.6
         for i, l in enumerate(lambdas):
-            costs_l = C(t_range, k, l)
+            t_r3 = np.linspace(t_start, t_max, 400)
+            costs_l = exec_cost(t_r3, k, l)
             ts_l = t_star(k, l)
-            cs_l = C(ts_l, k, l)
+            cs_l = exec_cost(ts_l, k, l)
             fig3.add_trace(go.Scatter(
-                x=t_range, y=costs_l,
+                x=t_r3, y=costs_l,
                 mode="lines", name=f"λ = {l}  (t* = {ts_l:.1f} min)",
                 line=dict(color=palette[i % len(palette)], width=2),
             ))
@@ -671,10 +679,10 @@ elif stage == "3️⃣  Execution Timing":
             height=440, title="Impact of Market Drift λ on Optimal Execution",
             xaxis=dict(title="Execution Time (minutes)", gridcolor="#1e2a38",
                        range=[0, t_max]),
-            yaxis=dict(title="Cost ($)", gridcolor="#1e2a38", range=[0, C(5, k, 20)]),
+            yaxis=dict(title="Cost ($)", gridcolor="#1e2a38", range=[0, y_ceil3]),
             margin=dict(l=50, r=20, t=50, b=50),
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
         st.markdown(
             '<div class="insight-box">As λ increases (faster-decaying signal), the optimal execution '
             'time shortens. In trending or volatile markets, execute aggressively. '
@@ -689,7 +697,7 @@ elif stage == "3️⃣  Execution Timing":
             rows.append({
                 "λ (drift rate)": l,
                 "t* (min)": f"{ts_l:.1f}",
-                "Min Cost ($)": f"{C(ts_l, k, l):.2f}",
+                "Min Cost ($)": f"{exec_cost(ts_l, k, l):.2f}",
                 "Signal type": ("Very slow" if l <= 1 else "Slow" if l <= 3
                                 else "Medium" if l <= 7 else "Fast" if l <= 15 else "Very fast"),
             })
