@@ -197,24 +197,21 @@ def animated_line(
 # ═══════════════════════════════════════════════════════════════
 # SIDEBAR
 # ═══════════════════════════════════════════════════════════════
+n_steps = 60  # max animation fps
+
 with st.sidebar:
-    st.markdown("## 📐 Optimal Trade Design")
+    st.markdown("## Optimal Trade Design")
     st.markdown("*A calculus-based framework*")
     st.divider()
 
     stage = st.radio(
         "**Navigate to Stage**",
-        ["🏠 Overview", "1️⃣  Trade Size", "2️⃣  Kelly Leverage", "3️⃣  Execution Timing", "🔗 Unified View"],
+        ["Overview", "Trade Size", "Kelly Leverage", "Execution Timing", "Unified View"],
         index=0,
     )
 
     st.divider()
-    st.markdown("### ⚙️ Animation")
-    n_steps = st.slider("Steps", 15, 60, 35, help="Frames in the animated build")
-    auto_play = st.checkbox("Auto-play on load", value=False)
-
-    st.divider()
-    st.markdown("### 🔗 Resources")
+    st.markdown("### Resources")
     st.markdown("[Math Derivations](docs/math_derivations.md)")
     st.markdown("[Parameter Guide](docs/parameter_guide.md)")
 
@@ -222,7 +219,7 @@ with st.sidebar:
 # ═══════════════════════════════════════════════════════════════
 # PAGE: OVERVIEW
 # ═══════════════════════════════════════════════════════════════
-if stage == "🏠 Overview":
+if stage == "Overview":
     st.markdown("# Optimal Trade Design")
     st.markdown("### A Calculus-Based Framework for Trading Decisions")
 
@@ -259,7 +256,7 @@ if stage == "🏠 Overview":
 # ═══════════════════════════════════════════════════════════════
 # PAGE: STAGE 1 — TRADE SIZE
 # ═══════════════════════════════════════════════════════════════
-elif stage == "1️⃣  Trade Size":
+elif stage == "Trade Size":
     st.markdown("## Stage 1 — Trade Size Optimization")
     st.markdown("**Problem**: Given your edge $\\alpha$ and market impact $\\beta$, how many shares should you trade?")
 
@@ -301,7 +298,7 @@ elif stage == "1️⃣  Trade Size":
 
     # ── Charts ──
     st.markdown('<div class="section-header">Visualizations</div>', unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📈 Profit Curve", "📊 Marginal Analysis", "🌡️ Sensitivity"])
+    tab1, tab2, tab3 = st.tabs(["Profit Curve", "Marginal Analysis", "Sensitivity"])
 
     x_range = np.linspace(1, x_max, 400)
     profits = profit(x_range, alpha, beta, c_cost)
@@ -392,7 +389,7 @@ elif stage == "1️⃣  Trade Size":
 # ═══════════════════════════════════════════════════════════════
 # PAGE: STAGE 2 — KELLY LEVERAGE
 # ═══════════════════════════════════════════════════════════════
-elif stage == "2️⃣  Kelly Leverage":
+elif stage == "Kelly Leverage":
     st.markdown("## Stage 2 — Leverage Optimization (Kelly Criterion)")
     st.markdown("**Problem**: How much leverage maximizes long-run growth while accounting for risk?")
 
@@ -432,7 +429,7 @@ elif stage == "2️⃣  Kelly Leverage":
 
     # ── Charts ──
     st.markdown('<div class="section-header">Visualizations</div>', unsafe_allow_html=True)
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 R(ℓ) Curve", "📊 Risk-Return", "📉 Fractional Kelly", "🌡️ Vol Regime Table"])
+    tab1, tab2, tab3, tab4 = st.tabs(["R(ℓ) Curve", "Risk-Return", "Fractional Kelly", "Vol Regime Table"])
 
     ell_range = np.linspace(0.05, ell_max, 400)
     returns   = R(ell_range, mu, sigma) * 100
@@ -550,7 +547,7 @@ elif stage == "2️⃣  Kelly Leverage":
 # ═══════════════════════════════════════════════════════════════
 # PAGE: STAGE 3 — EXECUTION TIMING
 # ═══════════════════════════════════════════════════════════════
-elif stage == "3️⃣  Execution Timing":
+elif stage == "Execution Timing":
     st.markdown("## Stage 3 — Execution Time Optimization")
     st.markdown("**Problem**: How long should you spread your trade to minimize slippage *and* opportunity cost?")
 
@@ -587,7 +584,7 @@ elif stage == "3️⃣  Execution Timing":
 
     # ── Charts ──
     st.markdown('<div class="section-header">Visualizations</div>', unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📈 Cost Curve (U-shape)", "📊 Component Breakdown", "🌡️ λ Regime Analysis"])
+    tab1, tab2, tab3 = st.tabs(["Cost Curve", "Component Breakdown", "λ Regime Analysis"])
 
     # Start at ts/4 so the spike at t≈0 doesn't crush the chart
     t_start = max(3.0, ts / 4)
@@ -707,7 +704,7 @@ elif stage == "3️⃣  Execution Timing":
 # ═══════════════════════════════════════════════════════════════
 # PAGE: UNIFIED VIEW
 # ═══════════════════════════════════════════════════════════════
-elif stage == "🔗 Unified View":
+elif stage == "Unified View":
     st.markdown("## Unified View — The Common Structure")
     st.markdown("All three problems share the same mathematical skeleton.")
 
