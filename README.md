@@ -74,7 +74,7 @@ optimal-trade-design/
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/optimal-trade-design.git
+git clone https://github.com/vij-akshat/optimal-trade-design.git
 cd optimal-trade-design
 
 # Install dependencies
